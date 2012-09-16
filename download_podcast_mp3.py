@@ -65,13 +65,16 @@ def getGMTDatetime(idateStr):
         if re.search(s, idateStr):
             tlag = v
             idateStr = re.sub(s, "GMT", idateStr)
-    idateValue = strptime(idateStr, "%a, %d %b %Y %H:%M:%S %Z")
+    try:
+        idateValue = strptime(idateStr, "%a, %d %b %Y %H:%M:%S %Z")
+    except:
+        idateValue = strptime(idateStr, "%a, %d %b %Y %H:%M %Z")
     idate = datetime(idateValue.tm_year,idateValue.tm_mon, idateValue.tm_mday, idateValue.tm_hour, idateValue.tm_min, idateValue.tm_sec)
     idate = idate - timedelta(hours = tlag)
     return idate
  
 def getFilename4mp3(idict):
-    ret = re.sub("[ :]", "_", idict["title"])
+    ret = re.sub("[^a-zA-Z0-9]", "_", idict["title"])
     ret = ret + "_"
     ret = ret + idict["date"].strftime("%Y_%m_%d_%H_%M")
     ret = ret + ".mp3"
