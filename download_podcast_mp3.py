@@ -74,7 +74,10 @@ def getGMTDatetime(idateStr):
     return idate
  
 def getFilename4mp3(idict):
-    ret = re.sub("[^a-zA-Z0-9]", "_", idict["title"])
+    ret = ""
+    if idict.has_key("prefix"):
+        ret = ret + idict["prefix"]
+    ret = ret + re.sub("[^a-zA-Z0-9]", "_", idict["title"])
     ret = ret + "_"
     ret = ret + idict["date"].strftime("%Y_%m_%d_%H_%M")
     ret = ret + ".mp3"
@@ -112,22 +115,28 @@ def main():
     --since n      : gets mp3s newer than n hours ago. 
                      default is 148 (24hours * 7days) 
     --title TITLE  : uses TITLE as filename
+    --prefix PREFIX  : add prefix to the filename
 """
         sys.exit()
     url = sys.argv[1]
     nhoursago = 7 * 24
     alttitle = None
+    prefix = None
     for i in range(2, len(sys.argv)):
         if sys.argv[i] == "--since" and i + 1 < len(sys.argv):
             nhoursago = int(sys.argv[i + 1])
         if sys.argv[i] == "--title" and i + 1 < len(sys.argv):
             alttitle = sys.argv[i + 1]
-
+        if sys.argv[i] == "--prefix" and i + 1 < len(sys.argv):
+            prefix = sys.argv[i + 1]
+
 #    items = getItemList(getPodcastXmlDom(url))
     items = getLatestItem(getItemList(getPodcastXmlDom(url)),nhoursago)
     for item in items:
         if alttitle:
             item["title"] = alttitle
+        if prefix:
+            item["prefix"] = prefix
         downloadFile(item["url"], getFilename4mp3(item))
         changeAccessTime(getFilename4mp3(item), item["date"])
 
